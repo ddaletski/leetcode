@@ -1,48 +1,53 @@
-mod node;
-use node::ListNode;
+type ListNode = common::linked_list::ListNode<i32>;
+pub struct Solution {}
+
+///////////////////////////////////////////////////////
 
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
-impl Ord for ListNode {
+#[derive(Eq, PartialEq)]
+struct HeapItem(Box<ListNode>);
+
+impl Ord for HeapItem {
     fn cmp(&self, other: &Self) -> Ordering {
-        other.val.cmp(&self.val)
+        other.0.val.cmp(&self.0.val)
     }
 }
-impl PartialOrd for ListNode {
+impl PartialOrd for HeapItem {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
-
-pub struct Solution {}
 
 impl Solution {
     pub fn merge_k_lists(lists: Vec<Option<Box<ListNode>>>) -> Option<Box<ListNode>> {
         let mut heap = BinaryHeap::with_capacity(lists.len());
 
         for list in lists {
-            heap.push(list)
+            if let Some(node) = list {
+                heap.push(HeapItem(node));
+            }
         }
 
         let mut head: Option<Box<ListNode>> = None;
         let mut tail = &mut head;
 
         while !heap.is_empty() {
-            let min_list = heap.pop().unwrap();
+            let HeapItem(next_node) = heap.pop().unwrap();
 
-            if let Some(next_node) = min_list {
-                match tail {
-                    None => {
-                        head = ListNode::new_link(next_node.val, None);
-                        tail = &mut head;
-                    }
-                    Some(node) => {
-                        node.next = ListNode::new_link(next_node.val, None);
-                        tail = &mut node.next;
-                    }
+            match tail {
+                None => {
+                    head = Some(Box::new(ListNode::new(next_node.val)));
+                    tail = &mut head;
                 }
-                heap.push(next_node.next)
+                Some(node) => {
+                    node.next = Some(Box::new(ListNode::new(next_node.val)));
+                    tail = &mut node.next;
+                }
+            }
+            if let Some(child) = next_node.next {
+                heap.push(HeapItem(child));
             }
         }
 
@@ -52,31 +57,20 @@ impl Solution {
 
 #[cfg(test)]
 mod tests {
-    use crate::{ListNode, Solution};
+    use crate::Solution;
     #[test]
-    fn parse_dump() {
-        let input = vec![1, 2, 3, 4, 5];
-
-        let parsed = ListNode::from_values(input.clone());
-        let dumped = ListNode::to_vec(parsed);
-        println!("{:?}", dumped);
-
-        assert_eq!(input, dumped);
-    }
-
-    #[test]
-    fn it_works() {
+    fn case1() {
         let input_values = vec![vec![1, 4, 5], vec![1, 3, 4], vec![2, 6]];
         let expected_values = vec![1, 1, 2, 3, 4, 4, 5, 6];
 
         let input_list: Vec<_> = input_values
             .into_iter()
-            .map(|vals| ListNode::from_values(vals))
+            .map(|vals| common::linked_list::vec_to_list(vals))
             .collect();
 
         let result_list = Solution::merge_k_lists(input_list);
 
-        let result_values = ListNode::to_vec(result_list);
+        let result_values = common::linked_list::list_to_vec(result_list);
 
         assert_eq!(result_values, expected_values);
     }
