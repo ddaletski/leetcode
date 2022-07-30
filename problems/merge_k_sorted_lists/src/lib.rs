@@ -1,7 +1,7 @@
 type ListNode = common::linked_list::ListNode<i32>;
 pub struct Solution {}
 
-///////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
@@ -30,30 +30,25 @@ impl Solution {
             }
         }
 
-        let mut head: Option<Box<ListNode>> = None;
+        let mut head: Box<ListNode> = Box::new(ListNode::new(0));
         let mut tail = &mut head;
 
         while !heap.is_empty() {
             let HeapItem(next_node) = heap.pop().unwrap();
 
-            match tail {
-                None => {
-                    head = Some(Box::new(ListNode::new(next_node.val)));
-                    tail = &mut head;
-                }
-                Some(node) => {
-                    node.next = Some(Box::new(ListNode::new(next_node.val)));
-                    tail = &mut node.next;
-                }
-            }
+            tail.next = Some(Box::new(ListNode::new(next_node.val)));
+            tail = tail.next.as_mut().unwrap();
+
             if let Some(child) = next_node.next {
                 heap.push(HeapItem(child));
             }
         }
 
-        head
+        head.next
     }
 }
+
+////////////////////////////////////////////////////////////////
 
 #[cfg(test)]
 mod tests {

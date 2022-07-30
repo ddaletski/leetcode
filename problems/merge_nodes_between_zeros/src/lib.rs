@@ -9,34 +9,20 @@ impl Solution {
 
         let mut current_sum = 0;
 
-        let mut result_head: Option<Box<ListNode>> = None;
-        let mut result_tail: &mut Option<Box<ListNode>> = &mut result_head;
+        let mut result_head = Box::new(ListNode::new(0));
+        let mut result_tail = &mut result_head;
 
-        loop {
-            if let Some(node) = input_head {
-                let next_node = node.next;
-                match node.val {
-                    0 => {
-                        if let Some(res_tail) = result_tail {
-                            res_tail.next = Some(Box::new(ListNode::new(current_sum)));
-                            result_tail = &mut res_tail.next;
-                        } else {
-                            result_head = Some(Box::new(ListNode::new(current_sum)));
-                            result_tail = &mut result_head;
-                        }
-                        current_sum = 0;
-                    }
-                    val => {
-                        current_sum += val;
-                    }
-                }
-                input_head = next_node;
-            } else {
-                break;
+        while let Some(node) = input_head {
+            current_sum += node.val;
+            if node.val == 0 {
+                result_tail.next = Some(Box::new(ListNode::new(current_sum)));
+                result_tail = result_tail.next.as_mut().unwrap();
+                current_sum = 0;
             }
+            input_head = node.next;
         }
 
-        result_head
+        result_head.next
     }
 }
 
