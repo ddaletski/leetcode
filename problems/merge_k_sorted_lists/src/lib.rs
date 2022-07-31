@@ -7,7 +7,7 @@ use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 
 #[derive(Eq, PartialEq)]
-struct HeapItem(Box<ListNode>);
+struct HeapItem(ListNode);
 
 impl Ord for HeapItem {
     fn cmp(&self, other: &Self) -> Ordering {
@@ -20,13 +20,19 @@ impl PartialOrd for HeapItem {
     }
 }
 
+impl From<ListNode> for HeapItem {
+    fn from(node: ListNode) -> Self {
+        Self(node)
+    }
+}
+
 impl Solution {
     pub fn merge_k_lists(lists: Vec<Option<Box<ListNode>>>) -> Option<Box<ListNode>> {
         let mut heap = BinaryHeap::with_capacity(lists.len());
 
         for list in lists {
             if let Some(node) = list {
-                heap.push(HeapItem(node));
+                heap.push(HeapItem(*node));
             }
         }
 
@@ -40,7 +46,7 @@ impl Solution {
             tail = tail.next.as_mut().unwrap();
 
             if let Some(child) = next_node.next {
-                heap.push(HeapItem(child));
+                heap.push(HeapItem(*child));
             }
         }
 
