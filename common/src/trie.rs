@@ -1,12 +1,9 @@
-use std::{fmt::Debug, mem::MaybeUninit, str::Chars};
-
-const A_Z_RANGE_SIZE: u8 = 'z' as u8 - 'a' as u8;
-const ALPHABET_SIZE: u8 = 2 * A_Z_RANGE_SIZE + 10;
+use std::{collections::HashMap, fmt::Debug, str::Chars};
 
 pub struct TrieNode {
     pub character: char,
     pub word_end: bool,
-    pub children: [Option<Box<TrieNode>>; ALPHABET_SIZE as usize],
+    pub children: HashMap<char, Box<TrieNode>>,
 }
 
 impl TrieNode {
@@ -14,16 +11,7 @@ impl TrieNode {
         TrieNode {
             character,
             word_end,
-            children: {
-                let mut arr_data: [MaybeUninit<Option<Box<TrieNode>>>; ALPHABET_SIZE as usize] =
-                    unsafe { MaybeUninit::uninit().assume_init() };
-
-                for item in &mut arr_data[..] {
-                    item.write(None);
-                }
-
-                unsafe { std::mem::transmute(arr_data) }
-            },
+            children: HashMap::new(),
         }
     }
 
@@ -32,14 +20,20 @@ impl TrieNode {
     }
 
     pub fn contains(&self, word: &str) -> bool {
-        self.contains_impl(word.chars())
+        if let Some(node) = self.find_impl(word.chars()) {
+            node.word_end
+        } else {
+            false
+        }
+    }
+
+    pub fn find_prefix(&self, prefix: &str) -> Option<&Self> {
+        self.find_impl(prefix.chars())
     }
 
     fn insert_impl(&mut self, mut word: Chars) -> bool {
         if let Some(next_char) = word.next() {
-            let code = ord(next_char) as usize;
-
-            match &mut self.children[code] {
+            match &mut self.children.get_mut(&next_char) {
                 Some(next_node) => {
                     return next_node.insert_impl(word);
                 }
@@ -47,7 +41,7 @@ impl TrieNode {
                     let mut next_node = Box::new(TrieNode::new(next_char, false));
                     let result = next_node.insert_impl(word);
 
-                    self.children[code] = Some(next_node);
+                    self.children.insert(next_char, next_node);
                     return result;
                 }
             }
@@ -57,25 +51,22 @@ impl TrieNode {
         return true;
     }
 
-    fn contains_impl(&self, mut word: Chars) -> bool {
+    fn find_impl(&self, mut word: Chars) -> Option<&Self> {
         if let Some(next_char) = word.next() {
-            let code = ord(next_char) as usize;
-
-            return if let Some(next_node) = &self.children[code] {
-                next_node.contains_impl(word)
+            if let Some(next_node) = &self.children.get(&next_char) {
+                return next_node.find_impl(word);
             } else {
-                false
-            };
-        } else {
-            self.word_end
+                return None;
+            }
         }
+        Some(self)
     }
 
     fn format_impl(&self, indent: usize, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let space = "| ".repeat(indent);
         f.write_fmt(format_args!("{}{}\n", space, self.character))?;
 
-        for node in self.children.iter().filter_map(|child| child.as_ref()) {
+        for node in self.children.values() {
             node.format_impl(indent + 1, f)?;
         }
 
@@ -91,14 +82,14 @@ impl Debug for TrieNode {
 }
 
 pub struct Trie {
-    root: Option<Box<TrieNode>>,
+    root: Box<TrieNode>,
     words_count: usize,
 }
 
 impl Trie {
     pub fn new() -> Self {
         Trie {
-            root: None,
+            root: Box::new(TrieNode::new('@', false)),
             words_count: 0,
         }
     }
@@ -108,15 +99,7 @@ impl Trie {
             return false;
         }
 
-        let inserted = if let Some(root_node) = &mut self.root {
-            root_node.insert(word)
-        } else {
-            let mut root_node = Box::new(TrieNode::new('@', false));
-            root_node.insert(word);
-            self.root = Some(root_node);
-
-            !word.is_empty()
-        };
+        let inserted = self.root.insert(word);
 
         if inserted {
             self.words_count += 1;
@@ -130,11 +113,11 @@ impl Trie {
             return false;
         }
 
-        if let Some(root_node) = &self.root {
-            root_node.contains(word)
-        } else {
-            false
-        }
+        self.root.contains(word)
+    }
+
+    pub fn find_prefix(&self, prefix: &str) -> Option<&TrieNode> {
+        self.root.find_prefix(prefix)
     }
 
     pub fn len(&self) -> usize {
@@ -144,33 +127,8 @@ impl Trie {
 
 impl Debug for Trie {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if let Some(root) = &self.root {
-            root.fmt(f)?;
-        } else {
-            f.write_str("<empty>")?;
-        }
+        self.root.fmt(f)?;
         Ok(())
-    }
-}
-
-pub fn ord(ch: char) -> u8 {
-    match ch {
-        'a'..='z' => ch as u8 - 'a' as u8,
-        'A'..='Z' => (ch as u8 - 'A' as u8) + A_Z_RANGE_SIZE,
-        '0'..='9' => (ch as u8 - '0' as u8) + 2 * A_Z_RANGE_SIZE,
-        _ => panic!("unsupported character {}", ch),
-    }
-}
-
-pub fn chr(code: u8) -> char {
-    if code < A_Z_RANGE_SIZE {
-        (code + 'a' as u8) as char
-    } else if code < 2 * A_Z_RANGE_SIZE {
-        (code - A_Z_RANGE_SIZE + 'A' as u8) as char
-    } else if code < ALPHABET_SIZE {
-        (code - 2 * A_Z_RANGE_SIZE + '0' as u8) as char
-    } else {
-        panic!("unsupported character code {}", code)
     }
 }
 
@@ -259,6 +217,11 @@ mod tests {
     }
 
     #[fixture]
+    fn lol_kek_chebureck_list() -> Vec<&'static str> {
+        vec!["lol", "kek", "chebureck"]
+    }
+
+    #[fixture]
     fn top100trie(mut empty_trie: Trie, top100words: Vec<&str>) -> Trie {
         for word in top100words.into_iter() {
             empty_trie.insert(&word);
@@ -276,7 +239,16 @@ mod tests {
         empty_trie
     }
 
-    mod trie_contains_inserted_items {
+    #[fixture]
+    fn lol_kek_chebureck_trie(mut empty_trie: Trie, lol_kek_chebureck_list: Vec<&str>) -> Trie {
+        for word in lol_kek_chebureck_list.into_iter() {
+            empty_trie.insert(word);
+        }
+
+        empty_trie
+    }
+
+    mod trie_contains_inserted_words {
         use super::*;
 
         #[rstest]
@@ -291,6 +263,42 @@ mod tests {
             for word in top100words {
                 assert_returns!(true, Trie::contains, &top100trie, word);
             }
+        }
+    }
+
+    mod trie_finds_inserted_words {
+        use super::*;
+
+        #[rstest]
+        fn random(random_trie: Trie, random_words: Vec<&str>) {
+            for word in random_words {
+                let returned_node = random_trie.find_prefix(word);
+                assert!(returned_node.is_some());
+                assert!(returned_node.unwrap().word_end);
+            }
+        }
+
+        #[rstest]
+        fn top100(top100trie: Trie, top100words: Vec<&str>) {
+            for word in top100words {
+                let returned_node = top100trie.find_prefix(word);
+                assert!(returned_node.is_some());
+                assert!(returned_node.unwrap().word_end);
+            }
+        }
+    }
+
+    #[rstest]
+    fn find_incomplete_word_returns_node_with_word_end_equals_false(
+        lol_kek_chebureck_trie: Trie,
+        lol_kek_chebureck_list: Vec<&str>,
+    ) {
+        for word in lol_kek_chebureck_list {
+            let incomplete_word = &word[0..word.len() - 1];
+            let found_node = lol_kek_chebureck_trie.find_prefix(incomplete_word);
+
+            assert!(found_node.is_some());
+            assert!(!found_node.unwrap().word_end);
         }
     }
 
