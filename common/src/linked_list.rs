@@ -44,7 +44,7 @@ pub fn list_to_vec<T>(list: Option<Box<ListNode<T>>>) -> Vec<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::linked_list::{vec_to_list, list_to_vec};
+    use crate::linked_list::{list_to_vec, vec_to_list};
     #[test]
     fn parse_dump() {
         let input = vec![1, 2, 3, 4, 5];
