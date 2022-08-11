@@ -3,6 +3,26 @@
 version = 3
 
 [[package]]
+name = "asserter"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0affaeda343cda38ca9aaa787fc61e4317ec7a64cf9cdbaeb3f6f01f7b57e495"
+dependencies = [
+ "asserter-macros",
+]
+
+[[package]]
+name = "asserter-macros"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de8047295adc90f160a7ffb5e6a7036c529d882c3593645598293ed0062df9d3"
+dependencies = [
+ "pmutil",
+ "proc-macro2",
+ "syn",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -60,6 +80,15 @@ name = "deepest_leaves_sum"
 version = "0.1.0"
 dependencies = [
  "common",
+]
+
+[[package]]
+name = "delete_the_middle_node_of_a_linked_list"
+version = "0.1.0"
+dependencies = [
+ "asserter",
+ "common",
+ "proptest",
 ]
 
 [[package]]
@@ -245,6 +274,17 @@ name = "pin-utils"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
+
+[[package]]
+name = "pmutil"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3894e5d549cccbe44afecf72922f277f603cd4bb0219c8342631ef18fffbe004"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "ppv-lite86"

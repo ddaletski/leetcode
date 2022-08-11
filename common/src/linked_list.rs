@@ -45,13 +45,15 @@ pub fn list_to_vec<T>(list: Option<Box<ListNode<T>>>) -> Vec<T> {
 #[cfg(test)]
 mod tests {
     use crate::linked_list::{list_to_vec, vec_to_list};
-    #[test]
-    fn parse_dump() {
-        let input = vec![1, 2, 3, 4, 5];
+    use proptest::{prop_assert_eq, proptest};
 
-        let parsed = vec_to_list::<i32>(input.clone());
-        let dumped = list_to_vec(parsed);
+    proptest! {
+        #[test]
+        fn parse_dump(input in proptest::collection::vec(-100..100, 0..5)) {
+            let parsed = vec_to_list::<i32>(input.clone());
+            let dumped = list_to_vec(parsed);
 
-        assert_eq!(input, dumped);
+            prop_assert_eq!(input, dumped);
+        }
     }
 }
