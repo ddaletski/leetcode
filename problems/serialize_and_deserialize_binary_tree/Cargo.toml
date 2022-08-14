@@ -7,4 +7,6 @@ edition = "2021"
 
 [dependencies]
 common = { path = "../../common" }
+
+[dev-dependencies]
 rstest = "0.15.0"

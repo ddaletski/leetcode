@@ -72,6 +72,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "count_primes"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "rstest",
+]
+
+[[package]]
 name = "custom_sort_string"
 version = "0.1.0"
 

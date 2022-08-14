@@ -6,6 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-asserter = "0.1.0"
 common = { path = "../../common" }
+
+[dev-dependencies]
+asserter = "0.1.0"
 proptest = "1.0.0"
