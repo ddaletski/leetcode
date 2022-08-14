@@ -463,6 +463,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "search_a_2d_matrix"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "rstest",
+]
+
+[[package]]
 name = "semver"
 version = "1.0.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
