@@ -78,6 +78,14 @@ impl DisjointSet {
         }
     }
 
+    pub fn components(&self) -> HashMap<usize, Vec<usize>> {
+        self.mapping.keys().fold(HashMap::new(), |mut map, item| {
+            let id = self.id_of(item).unwrap();
+            map.entry(id).or_insert(vec![]).push(*item);
+            map
+        })
+    }
+
     pub fn components_count(&self) -> usize {
         self.mapping
             .keys()
@@ -118,6 +126,7 @@ mod tests {
     use super::*;
     use proptest::{prop_assert, proptest};
     use rand::{distributions::Distribution, seq::SliceRandom, thread_rng, Rng};
+    use spectral::prelude::*;
 
     use rstest::{fixture, rstest};
 
@@ -156,9 +165,26 @@ mod tests {
 
     fn chain_nodes(nodes: &Vec<usize>) -> Vec<(usize, usize)> {
         assert!(nodes.len() >= 2);
+
         (0..(nodes.len() - 1))
             .map(|i| (nodes[i], nodes[i + 1]))
             .collect()
+    }
+
+    fn randomize_links(mut links: Vec<(usize, usize)>) -> Vec<(usize, usize)> {
+        let mut rng = thread_rng();
+
+        // shuffle links
+        links.shuffle(&mut rng);
+
+        // swap links endpoints randomly
+        for link in links.iter_mut() {
+            if rng.gen_bool(0.5) {
+                std::mem::swap(&mut link.0, &mut link.1);
+            }
+        }
+
+        links
     }
 
     #[fixture]
@@ -170,6 +196,7 @@ mod tests {
             let to = ((component_idx + 1) * 10) as usize;
             let nodes = rand_permutation(from, to);
             let links = chain_nodes(&nodes);
+            let links = randomize_links(links);
 
             for (a, b) in links {
                 set.join(a, b);
@@ -215,15 +242,30 @@ mod tests {
     }
 
     #[rstest]
+    fn components_content_is_correct(set_10by10: DisjointSet) {
+        let mut components: Vec<Vec<usize>> = set_10by10.components().values().cloned().collect();
+        components.sort_by_key(|values| values[0]);
+
+        for i in 0..10 {
+            let expected_content: Vec<usize> = ((i * 10)..((i + 1) * 10)).collect();
+            assert_that(&components[i as usize]).contains_all_of(&expected_content.iter());
+        }
+        assert_returns!(10, DisjointSet::components_count, &set_10by10);
+    }
+
+    #[rstest]
     fn joining_n_components_makes_single_component(mut set_10by10: DisjointSet) {
         let mut rng = thread_rng();
-        for comp_1 in 0..9 {
-            let comp_2 = comp_1 + 1;
 
-            let id1 = comp_1 * 10 + rng.gen_range(0..10);
-            let id2 = comp_2 * 10 + rng.gen_range(0..10);
+        let some_node_for_each_component: Vec<usize> = (0..10)
+            .map(|comp_id| comp_id * 10 + rng.gen_range(0..10))
+            .collect();
 
-            set_10by10.join(id1, id2);
+        let intercomponent_links = chain_nodes(&some_node_for_each_component);
+        let intercomponent_links = randomize_links(intercomponent_links);
+
+        for (from, to) in intercomponent_links {
+            set_10by10.join(from, to);
         }
 
         assert_returns!(1, DisjointSet::components_count, &set_10by10);
@@ -249,6 +291,34 @@ mod tests {
         for i in 1..=5 {
             assert_returns!(Some(1), DisjointSet::id_of, &set_1to5_linear, &i);
         }
+    }
+
+    #[rstest]
+    fn components_are_valid_manual() {
+        let mut set = DisjointSet::new();
+
+        set.join(1, 2);
+        assert_returns!(1, DisjointSet::components_count, &set);
+        set.join(3, 4);
+        assert_returns!(2, DisjointSet::components_count, &set);
+
+        set.join(5, 6);
+        assert_returns!(3, DisjointSet::components_count, &set);
+        set.join(7, 8);
+        assert_returns!(4, DisjointSet::components_count, &set);
+
+        set.join(1, 4);
+        assert_returns!(3, DisjointSet::components_count, &set);
+        set.join(7, 6);
+        assert_returns!(2, DisjointSet::components_count, &set);
+
+        set.join(6, 4);
+        assert_returns!(1, DisjointSet::components_count, &set);
+
+        let component = set.components().values().next().cloned().unwrap();
+
+        let all_items: Vec<usize> = (1..=8).collect();
+        assert_that(&component).contains_all_of(&all_items.iter());
     }
 
     proptest! {
