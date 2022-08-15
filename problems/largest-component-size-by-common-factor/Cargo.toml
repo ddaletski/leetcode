@@ -1,0 +1,19 @@
+[package]
+name = "largest-component-size-by-common-factor"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+common = { path = "../../common" }
+
+[dev-dependencies]
+bencher = "0.1.5"
+rand = "0.8.5"
+rstest = "0.15.0"
+spectral = "0.6.0"
+
+[[bench]]
+name = "benches"
+harness = false

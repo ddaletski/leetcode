@@ -456,7 +456,9 @@ version = "0.1.0"
 dependencies = [
  "bencher",
  "common",
+ "rand 0.8.5",
  "rstest",
+ "spectral",
 ]
 
 [[package]]
