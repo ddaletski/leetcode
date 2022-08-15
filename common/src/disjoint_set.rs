@@ -26,7 +26,7 @@ impl DisjointSet {
         self.mapping.contains_key(item)
     }
 
-    /// insert the id of the item's component if it's inserted
+    /// get the id of the item's component if it's inserted
     /// otherwise return None
     pub fn id_of(&self, item: &usize) -> Option<usize> {
         let mut curr_item = item;
@@ -38,6 +38,35 @@ impl DisjointSet {
             }
         }
         None
+    }
+
+    /// get the id of the item's component and optimize the whole ids chain while doing it
+    fn get_id_and_optimize(&mut self, item: &usize) -> Option<usize> {
+        let chain_of_ids = |item: &usize| {
+            let mut chain = vec![];
+
+            let mut curr_item = item;
+            while let Some(next_item) = self.mapping.get(curr_item) {
+                if next_item == curr_item {
+                    chain.push(*curr_item);
+                    return chain;
+                } else {
+                    chain.push(*curr_item);
+                    curr_item = next_item;
+                }
+            }
+
+            chain
+        };
+
+        if let Some((last_id, other_ids)) = chain_of_ids(item).split_last() {
+            for id in other_ids {
+                self.mapping.insert(*id, *last_id);
+            }
+            Some(*last_id)
+        } else {
+            None
+        }
     }
 
     /// insert the item if it isn't present
@@ -54,7 +83,10 @@ impl DisjointSet {
     /// join two items and return id of the connected component they are in after joining
     /// if some (or both) of the items wasn't present, it's inserted before joining
     pub fn join(&mut self, item1: usize, item2: usize) -> usize {
-        match (self.id_of(&item1), self.id_of(&item2)) {
+        match (
+            self.get_id_and_optimize(&item1),
+            self.get_id_and_optimize(&item2),
+        ) {
             (None, None) => {
                 self.mapping.insert(item1, item1);
                 self.mapping.insert(item2, item1);
