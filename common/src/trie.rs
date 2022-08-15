@@ -48,7 +48,7 @@ impl TrieNode {
         }
 
         self.word_end = true;
-        return true;
+        true
     }
 
     fn find_impl(&self, mut word: Chars) -> Option<&Self> {
@@ -123,6 +123,16 @@ impl Trie {
     pub fn len(&self) -> usize {
         self.words_count
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.words_count == 0
+    }
+}
+
+impl Default for Trie {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Debug for Trie {
@@ -133,7 +143,10 @@ impl Debug for Trie {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
+    use super::Trie;
+    use crate::assert_returns;
+    use rstest::{fixture, rstest};
     use std::path::PathBuf;
 
     use lazy_static::lazy_static;
@@ -144,9 +157,6 @@ mod tests {
         distributions::{DistString, Uniform},
         prelude::Distribution,
     };
-    use rstest::{fixture, rstest};
-    use super::Trie;
-    use crate::assert_returns;
 
     #[fixture]
     fn empty_trie() -> Trie {

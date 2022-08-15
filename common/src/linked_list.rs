@@ -30,13 +30,9 @@ pub fn list_to_vec<T>(list: Option<Box<ListNode<T>>>) -> Vec<T> {
     let mut result = vec![];
 
     let mut head = list;
-    loop {
-        if let Some(node) = head {
-            result.push(node.val);
-            head = node.next;
-        } else {
-            break;
-        }
+    while let Some(node) = head {
+        result.push(node.val);
+        head = node.next;
     }
 
     result

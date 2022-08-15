@@ -1,6 +1,7 @@
 pub mod binary_tree;
 pub mod linked_list;
 pub mod trie;
+pub mod disjoint_set;
 
 #[macro_export]
 macro_rules! assert_returns {
