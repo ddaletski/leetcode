@@ -1,21 +1,18 @@
-use std::{
-    collections::{HashMap, HashSet},
-    hash::Hash,
-};
+use std::collections::{HashMap, HashSet};
+
+pub trait UnionFind {
+    fn join(&mut self, item1: usize, item2: usize) -> usize;
+    fn connected(&mut self, item1: &usize, item2: &usize) -> bool;
+}
 
 #[derive(Debug, Default)]
-pub struct DisjointSet {
+pub struct DisjointHashSet {
     mapping: HashMap<usize, usize>,
 }
 
-pub struct ItemProxy<'a> {
-    set: &'a DisjointSet,
-    item: &'a usize,
-}
-
-impl DisjointSet {
+impl DisjointHashSet {
     pub fn new() -> Self {
-        DisjointSet::default()
+        DisjointHashSet::default()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -80,9 +77,30 @@ impl DisjointSet {
         }
     }
 
+    pub fn components(&self) -> HashMap<usize, Vec<usize>> {
+        self.mapping.keys().fold(HashMap::new(), |mut map, item| {
+            let id = self.id_of(item).unwrap();
+            map.entry(id).or_insert(vec![]).push(*item);
+            map
+        })
+    }
+
+    pub fn components_count(&self) -> usize {
+        self.mapping
+            .keys()
+            .map(|k| self.id_of(k).unwrap())
+            .fold(HashSet::new(), |mut set, item| {
+                set.insert(item);
+                set
+            })
+            .len()
+    }
+}
+
+impl UnionFind for DisjointHashSet {
     /// join two items and return id of the connected component they are in after joining
     /// if some (or both) of the items wasn't present, it's inserted before joining
-    pub fn join(&mut self, item1: usize, item2: usize) -> usize {
+    fn join(&mut self, item1: usize, item2: usize) -> usize {
         match (
             self.get_id_and_optimize(&item1),
             self.get_id_and_optimize(&item2),
@@ -110,44 +128,8 @@ impl DisjointSet {
         }
     }
 
-    pub fn components(&self) -> HashMap<usize, Vec<usize>> {
-        self.mapping.keys().fold(HashMap::new(), |mut map, item| {
-            let id = self.id_of(item).unwrap();
-            map.entry(id).or_insert(vec![]).push(*item);
-            map
-        })
-    }
-
-    pub fn components_count(&self) -> usize {
-        self.mapping
-            .keys()
-            .map(|k| self.id_of(k).unwrap())
-            .fold(HashSet::new(), |mut set, item| {
-                set.insert(item);
-                set
-            })
-            .len()
-    }
-
-    pub fn connected(&self, item1: &usize, item2: &usize) -> bool {
-        self.id_of(item1) == self.id_of(item2)
-    }
-
-    pub fn is<'a>(&'a self, item: &'a usize) -> ItemProxy<'a> {
-        ItemProxy { set: self, item }
-    }
-}
-
-impl<'a> ItemProxy<'a>
-where
-    usize: Hash + Eq + Clone,
-{
-    pub fn connected_to(&self, other: &usize) -> bool {
-        self.set.connected(self.item, other)
-    }
-
-    pub fn inserted(&self) -> bool {
-        self.set.contains(self.item)
+    fn connected(&mut self, item1: &usize, item2: &usize) -> bool {
+        self.get_id_and_optimize(item1) == self.get_id_and_optimize(item2)
     }
 }
 
@@ -165,12 +147,12 @@ mod tests {
     use crate::assert_returns;
 
     #[fixture]
-    fn empty_set() -> DisjointSet {
-        DisjointSet::new()
+    fn empty_set() -> DisjointHashSet {
+        DisjointHashSet::new()
     }
 
     #[fixture]
-    fn set_100_orphans(mut empty_set: DisjointSet) -> DisjointSet {
+    fn set_100_orphans(mut empty_set: DisjointHashSet) -> DisjointHashSet {
         for i in 0..100 {
             empty_set.insert(i);
         }
@@ -179,7 +161,7 @@ mod tests {
     }
 
     #[fixture]
-    fn set_1to5_linear(mut empty_set: DisjointSet) -> DisjointSet {
+    fn set_1to5_linear(mut empty_set: DisjointHashSet) -> DisjointHashSet {
         for i in 1..5 {
             empty_set.join(i, i + 1);
         }
@@ -220,7 +202,7 @@ mod tests {
     }
 
     #[fixture]
-    fn set_10by10(set_100_orphans: DisjointSet) -> DisjointSet {
+    fn set_10by10(set_100_orphans: DisjointHashSet) -> DisjointHashSet {
         let mut set = set_100_orphans;
 
         for component_idx in 0..10 {
@@ -241,16 +223,16 @@ mod tests {
     /////////////////////////////////////
 
     #[rstest]
-    fn inserting_new_item_increments_id(empty_set: DisjointSet) {
+    fn inserting_new_item_increments_id(empty_set: DisjointHashSet) {
         let mut set = empty_set;
 
         for i in 0..1000 {
-            assert_returns!(i as usize, DisjointSet::insert, &mut set, i);
+            assert_returns!(i as usize, DisjointHashSet::insert, &mut set, i);
         }
     }
 
     #[rstest]
-    fn inserted_items_are_have_unique_ids(set_100_orphans: DisjointSet) {
+    fn inserted_items_are_have_unique_ids(set_100_orphans: DisjointHashSet) {
         for i in 0..100 {
             for j in (i + 1)..100 {
                 assert_ne!(set_100_orphans.id_of(&i), set_100_orphans.id_of(&j));
@@ -259,22 +241,28 @@ mod tests {
     }
 
     #[rstest]
-    fn inserted_items_are_disconnected(set_100_orphans: DisjointSet) {
+    fn inserted_items_are_disconnected(mut set_100_orphans: DisjointHashSet) {
         for i in 0..100 {
             for j in (i + 1)..100 {
-                assert_returns!(false, DisjointSet::connected, &set_100_orphans, &i, &j);
+                assert_returns!(
+                    false,
+                    DisjointHashSet::connected,
+                    &mut set_100_orphans,
+                    &i,
+                    &j
+                );
             }
         }
-        assert_returns!(100, DisjointSet::components_count, &set_100_orphans);
+        assert_returns!(100, DisjointHashSet::components_count, &set_100_orphans);
     }
 
     #[rstest]
-    fn components_count_is_correct(set_10by10: DisjointSet) {
-        assert_returns!(10, DisjointSet::components_count, &set_10by10);
+    fn components_count_is_correct(set_10by10: DisjointHashSet) {
+        assert_returns!(10, DisjointHashSet::components_count, &set_10by10);
     }
 
     #[rstest]
-    fn components_content_is_correct(set_10by10: DisjointSet) {
+    fn components_content_is_correct(set_10by10: DisjointHashSet) {
         let mut components: Vec<Vec<usize>> = set_10by10.components().values().cloned().collect();
         components.sort_by_key(|values| values[0]);
 
@@ -282,11 +270,11 @@ mod tests {
             let expected_content: Vec<usize> = ((i * 10)..((i + 1) * 10)).collect();
             assert_that(&components[i as usize]).contains_all_of(&expected_content.iter());
         }
-        assert_returns!(10, DisjointSet::components_count, &set_10by10);
+        assert_returns!(10, DisjointHashSet::components_count, &set_10by10);
     }
 
     #[rstest]
-    fn joining_n_components_makes_single_component(mut set_10by10: DisjointSet) {
+    fn joining_n_components_makes_single_component(mut set_10by10: DisjointHashSet) {
         let mut rng = thread_rng();
 
         let some_node_for_each_component: Vec<usize> = (0..10)
@@ -300,11 +288,11 @@ mod tests {
             set_10by10.join(from, to);
         }
 
-        assert_returns!(1, DisjointSet::components_count, &set_10by10);
+        assert_returns!(1, DisjointHashSet::components_count, &set_10by10);
     }
 
     #[rstest]
-    fn joining_items_makes_their_ids_equal(mut set_100_orphans: DisjointSet) {
+    fn joining_items_makes_their_ids_equal(mut set_100_orphans: DisjointHashSet) {
         let mut rng = thread_rng();
         let id_distr1 = rand::distributions::Uniform::from(0..100);
         let id_distr2 = rand::distributions::Uniform::from(0..100);
@@ -319,33 +307,33 @@ mod tests {
     }
 
     #[rstest]
-    fn item_has_id_of_its_terminal_link(set_1to5_linear: DisjointSet) {
+    fn item_has_id_of_its_terminal_link(set_1to5_linear: DisjointHashSet) {
         for i in 1..=5 {
-            assert_returns!(Some(1), DisjointSet::id_of, &set_1to5_linear, &i);
+            assert_returns!(Some(1), DisjointHashSet::id_of, &set_1to5_linear, &i);
         }
     }
 
     #[rstest]
     fn components_are_valid_manual() {
-        let mut set = DisjointSet::new();
+        let mut set = DisjointHashSet::new();
 
         set.join(1, 2);
-        assert_returns!(1, DisjointSet::components_count, &set);
+        assert_returns!(1, DisjointHashSet::components_count, &set);
         set.join(3, 4);
-        assert_returns!(2, DisjointSet::components_count, &set);
+        assert_returns!(2, DisjointHashSet::components_count, &set);
 
         set.join(5, 6);
-        assert_returns!(3, DisjointSet::components_count, &set);
+        assert_returns!(3, DisjointHashSet::components_count, &set);
         set.join(7, 8);
-        assert_returns!(4, DisjointSet::components_count, &set);
+        assert_returns!(4, DisjointHashSet::components_count, &set);
 
         set.join(1, 4);
-        assert_returns!(3, DisjointSet::components_count, &set);
+        assert_returns!(3, DisjointHashSet::components_count, &set);
         set.join(7, 6);
-        assert_returns!(2, DisjointSet::components_count, &set);
+        assert_returns!(2, DisjointHashSet::components_count, &set);
 
         set.join(6, 4);
-        assert_returns!(1, DisjointSet::components_count, &set);
+        assert_returns!(1, DisjointHashSet::components_count, &set);
 
         let component = set.components().values().next().cloned().unwrap();
 
@@ -356,14 +344,14 @@ mod tests {
     proptest! {
         #[test]
         fn new_set_contains_nothing(num in 0..1000) {
-            let set = DisjointSet::new();
+            let set = DisjointHashSet::new();
 
             prop_assert!(!set.contains(&(num as usize)));
         }
 
         #[test]
         fn id_of_returns_none_if_item_isnt_inserted(num in 0..1000) {
-            let set = DisjointSet::new();
+            let set = DisjointHashSet::new();
 
             prop_assert!(set.id_of(&(num as usize)).is_none());
         }

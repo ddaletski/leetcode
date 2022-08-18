@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use common::disjoint_set::DisjointSet;
+use common::disjoint_set::{DisjointHashSet, UnionFind};
 
 pub struct Solution {}
 
@@ -20,14 +20,13 @@ fn factors(num: usize) -> Vec<usize> {
     result
 }
 
-
 ////////////////////////////////////////
 
 impl Solution {
     pub fn largest_component_size(nums: Vec<i32>) -> i32 {
         let nums_set: HashSet<usize> = nums.iter().map(|&n| n as usize).collect();
 
-        let mut set = DisjointSet::new();
+        let mut set = DisjointHashSet::new();
 
         for num in nums.into_iter().map(|i| i as usize) {
             set.insert(num);
