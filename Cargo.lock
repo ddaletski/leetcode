@@ -126,6 +126,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "count-number-of-homogenous-substrings"
+version = "0.1.0"
+dependencies = [
+ "rstest",
+]
+
+[[package]]
 name = "count_primes"
 version = "0.1.0"
 dependencies = [
