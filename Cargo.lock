@@ -458,6 +458,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "k-closest-points-to-origin"
+version = "0.1.0"
+dependencies = [
+ "rstest",
+ "spectral",
+]
+
+[[package]]
 name = "largest-component-size-by-common-factor"
 version = "0.1.0"
 dependencies = [
