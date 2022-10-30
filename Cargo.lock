@@ -427,6 +427,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "implement-magic-dictionary"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "rstest",
+]
+
+[[package]]
 name = "implement-queue-using-stacks"
 version = "0.1.0"
 dependencies = [

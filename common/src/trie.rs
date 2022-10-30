@@ -31,6 +31,10 @@ impl TrieNode {
         self.find_impl(prefix.chars())
     }
 
+    pub fn next(&self, next_char: char) -> Option<&Self> {
+         self.children.get(&next_char).map(|b| b.as_ref())
+    }
+
     fn insert_impl(&mut self, mut word: Chars) -> bool {
         if let Some(next_char) = word.next() {
             match &mut self.children.get_mut(&next_char) {
@@ -114,6 +118,10 @@ impl Trie {
         }
 
         self.root.contains(word)
+    }
+
+    pub fn root(&self) -> &TrieNode {
+        &self.root
     }
 
     pub fn find_prefix(&self, prefix: &str) -> Option<&TrieNode> {
