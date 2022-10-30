@@ -14,14 +14,19 @@ def clone_problem(url: str):
     problem_name = urlparse(url).path.strip("/").split("/")[-1]
     print(f"clonning {problem_name}")
 
-    initialize_problem_dir(problems_dir / problem_name)
+
+    problem_dir = problems_dir / problem_name
+    init_cargo_project(problem_dir)
+
+    with open(problem_dir / "link.txt", "w") as f:
+        f.write(url)
 
 
-def initialize_problem_dir(problem_dir: Path):
+def init_cargo_project(problem_dir: Path):
     try:
         problem_dir.mkdir()
     except FileExistsError:
-        print("problem is already clonned")
+        print("problem is already cloned")
         return
 
     def run_command(cmd: str):

@@ -435,6 +435,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "implement-stack-using-queues"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "rstest",
+]
+
+[[package]]
 name = "instant"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
