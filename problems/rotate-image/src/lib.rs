@@ -59,87 +59,16 @@ impl Solution2 {
 
 #[cfg(test)]
 mod tests {
+    use common::parse_2d_array;
+    use common::vec2d;
+
     use crate::Solution;
     use crate::Solution2;
 
-    fn parse_2d_array(input_str: &str) -> Vec<Vec<i32>> {
-        let mut result = vec![];
-
-        let mut current_vec: Vec<i32> = vec![];
-
-        let mut current_num = 0;
-        let mut is_num = false;
-        let mut is_arr = false;
-        for ch in input_str.chars().skip(1) {
-            match ch {
-                '[' => {
-                    is_arr = true;
-                }
-                ']' => {
-                    if is_arr {
-                        is_arr = false;
-                        if is_num {
-                            is_num = false;
-                            current_vec.push(current_num);
-                        }
-                        current_num = 0;
-                        result.push(std::mem::replace(&mut current_vec, vec![]));
-                    } else {
-                        break;
-                    }
-                }
-                ',' => {
-                    if is_arr {
-                        is_num = false;
-                        current_vec.push(current_num);
-                        current_num = 0;
-                    }
-                }
-                digit @ '0'..='9' => {
-                    if !is_num {
-                        is_num = true;
-                        current_num = digit.to_digit(10).unwrap() as i32;
-                    } else {
-                        current_num = current_num * 10 + digit.to_digit(10).unwrap() as i32;
-                    }
-                }
-                ' ' => {}
-                _ => {
-                    unreachable!()
-                }
-            }
-        }
-        result
-    }
-
-    #[test]
-    fn parser_test1() {
-        let input_str = "[[1,2,3],[4,5,6],[7,8,9]]";
-        let expected = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
-        let parsed = parse_2d_array(input_str);
-        assert_eq!(expected, parsed);
-    }
-
-    #[test]
-    fn parser_test2() {
-        let input_str = "[[112,72],[6],[],[70124234,8,9]]";
-        let expected = vec![vec![112, 72], vec![6], vec![], vec![70124234, 8, 9]];
-        let parsed = parse_2d_array(input_str);
-        assert_eq!(parsed, expected);
-    }
-
-    #[test]
-    fn parser_works_on_empty_array() {
-        let input_str = "[]";
-        let expected: Vec<Vec<i32>> = vec![];
-        let parsed = parse_2d_array(input_str);
-        assert_eq!(parsed, expected);
-    }
-
     #[test]
     fn test1_1() {
-        let mut matrix = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
-        let expected = vec![vec![7, 4, 1], vec![8, 5, 2], vec![9, 6, 3]];
+        let mut matrix = vec2d![[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+        let expected = vec2d![[7, 4, 1], [8, 5, 2], [9, 6, 3]];
 
         Solution::rotate(&mut matrix);
 
@@ -161,8 +90,8 @@ mod tests {
 
     #[test]
     fn test2_1() {
-        let mut matrix = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
-        let expected = vec![vec![7, 4, 1], vec![8, 5, 2], vec![9, 6, 3]];
+        let mut matrix = vec2d![[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+        let expected = vec2d![[7, 4, 1], [8, 5, 2], [9, 6, 3]];
 
         Solution2::rotate(&mut matrix);
 

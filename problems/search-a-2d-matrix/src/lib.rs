@@ -40,7 +40,7 @@ impl Solution {
 #[cfg(test)]
 mod tests {
     use super::Solution;
-    use common::assert_returns;
+    use common::{assert_returns, vec2d};
     use rstest::{fixture, rstest};
 
     #[rstest]
@@ -50,12 +50,12 @@ mod tests {
 
     #[rstest]
     fn empty2() {
-        assert_returns!(false, Solution::search_matrix, vec![vec![], vec![]] as Vec<Vec<i32>>, 1);
+        assert_returns!(false, Solution::search_matrix, vec2d![[], []] as Vec<Vec<i32>>, 1);
     }
 
     #[fixture]
     fn matrix() -> Vec<Vec<i32>> {
-        vec![vec![1, 3, 5, 7], vec![10, 11, 16, 20], vec![23, 30, 34, 60]]
+        vec2d![[1, 3, 5, 7], [10, 11, 16, 20], [23, 30, 34, 60]]
     }
 
     #[rstest]

@@ -107,14 +107,14 @@ impl Solution {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use common::assert_returns;
+    use common::{assert_returns, vec2d};
     use rstest::rstest;
 
     #[rstest]
-    #[case(vec![vec!["A","B","C","E"],vec!["S","F","C","S"],vec!["A","D","E","E"]], "ABCCED", true)]
-    #[case(vec![vec!["A","B","C","E"],vec!["S","F","C","S"],vec!["A","D","E","E"]], "SEE", true)]
-    #[case(vec![vec!["A","B","C","E"],vec!["S","F","C","S"],vec!["A","D","E","E"]], "ABCB", false)]
-    #[case(vec![vec!["a","a","a"],vec!["A","A","A"],vec!["a","a","a"]], "aAaaaAaaA", true)]
+    #[case(vec2d![["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], "ABCCED", true)]
+    #[case(vec2d![["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], "SEE", true)]
+    #[case(vec2d![["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]], "ABCB", false)]
+    #[case(vec2d![["a","a","a"],    ["A","A","A"],    ["a","a","a"]],     "aAaaaAaaA", true)]
     #[rstest]
     fn it_works(#[case] board: Vec<Vec<&str>>, #[case] word: &str, #[case] expected_result: bool) {
         let board = board

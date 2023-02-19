@@ -121,7 +121,7 @@ dependencies = [
  "lazy_static",
  "proptest",
  "rand 0.8.5",
- "rstest",
+ "rstest 0.15.0",
  "spectral",
 ]
 
@@ -129,7 +129,7 @@ dependencies = [
 name = "count-number-of-homogenous-substrings"
 version = "0.1.0"
 dependencies = [
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -137,7 +137,7 @@ name = "count_primes"
 version = "0.1.0"
 dependencies = [
  "common",
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -280,7 +280,7 @@ dependencies = [
 name = "find_triangular_sum_of_an_array"
 version = "0.1.0"
 dependencies = [
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -288,7 +288,7 @@ name = "flatten-nested-list-iterator"
 version = "0.1.0"
 dependencies = [
  "common",
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -425,11 +425,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "image-overlap"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "rstest 0.16.0",
+]
+
+[[package]]
 name = "implement-magic-dictionary"
 version = "0.1.0"
 dependencies = [
  "common",
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -437,7 +445,7 @@ name = "implement-queue-using-stacks"
 version = "0.1.0"
 dependencies = [
  "common",
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -445,7 +453,7 @@ name = "implement-stack-using-queues"
 version = "0.1.0"
 dependencies = [
  "common",
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -491,7 +499,7 @@ dependencies = [
 name = "k-closest-points-to-origin"
 version = "0.1.0"
 dependencies = [
- "rstest",
+ "rstest 0.15.0",
  "spectral",
 ]
 
@@ -502,7 +510,7 @@ dependencies = [
  "bencher",
  "common",
  "rand 0.8.5",
- "rstest",
+ "rstest 0.15.0",
  "spectral",
 ]
 
@@ -554,7 +562,7 @@ name = "merge_nodes_between_zeros"
 version = "0.1.0"
 dependencies = [
  "common",
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -662,7 +670,7 @@ name = "partition-list"
 version = "0.1.0"
 dependencies = [
  "common",
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -885,7 +893,7 @@ dependencies = [
 name = "reduce-array-size-to-the-half"
 version = "0.1.0"
 dependencies = [
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -921,6 +929,9 @@ dependencies = [
 [[package]]
 name = "rotate_image"
 version = "0.1.0"
+dependencies = [
+ "common",
+]
 
 [[package]]
 name = "rstest"
@@ -930,7 +941,19 @@ checksum = "e9c9dc66cc29792b663ffb5269be669f1613664e69ad56441fdb895c2347b930"
 dependencies = [
  "futures",
  "futures-timer",
- "rstest_macros",
+ "rstest_macros 0.14.0",
+ "rustc_version",
+]
+
+[[package]]
+name = "rstest"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b07f2d176c472198ec1e6551dc7da28f1c089652f66a7b722676c2238ebc0edf"
+dependencies = [
+ "futures",
+ "futures-timer",
+ "rstest_macros 0.16.0",
  "rustc_version",
 ]
 
@@ -945,6 +968,20 @@ dependencies = [
  "quote",
  "rustc_version",
  "syn",
+]
+
+[[package]]
+name = "rstest_macros"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7229b505ae0706e64f37ffc54a9c163e11022a6636d58fe1f3f52018257ff9f7"
+dependencies = [
+ "cfg-if",
+ "proc-macro2",
+ "quote",
+ "rustc_version",
+ "syn",
+ "unicode-ident",
 ]
 
 [[package]]
@@ -1000,7 +1037,7 @@ name = "search_a_2d_matrix"
 version = "0.1.0"
 dependencies = [
  "common",
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -1052,7 +1089,7 @@ name = "serialize_and_deserialize_binary_tree"
 version = "0.1.0"
 dependencies = [
  "common",
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -1060,7 +1097,7 @@ name = "single-threaded-cpu"
 version = "0.1.0"
 dependencies = [
  "common",
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -1077,7 +1114,7 @@ name = "snapshot-array"
 version = "0.1.0"
 dependencies = [
  "common",
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -1094,7 +1131,7 @@ name = "stream_of_characters"
 version = "0.1.0"
 dependencies = [
  "common",
- "rstest",
+ "rstest 0.15.0",
 ]
 
 [[package]]
@@ -1275,9 +1312,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
+name = "word-break"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "rstest 0.15.0",
+]
+
+[[package]]
 name = "word-search"
 version = "0.1.0"
 dependencies = [
  "common",
- "rstest",
+ "rstest 0.15.0",
 ]
