@@ -32,7 +32,7 @@ impl TrieNode {
     }
 
     pub fn next(&self, next_char: char) -> Option<&Self> {
-         self.children.get(&next_char).map(|b| b.as_ref())
+        self.children.get(&next_char).map(|b| b.as_ref())
     }
 
     fn insert_impl(&mut self, mut word: Chars) -> bool {
@@ -64,6 +64,18 @@ impl TrieNode {
             }
         }
         Some(self)
+    }
+
+    fn fill_all_children(&self, current_word: &mut Vec<char>, result: &mut Vec<String>) {
+        if self.word_end {
+            result.push(current_word.iter().collect());
+        }
+
+        self.children.iter().for_each(|(&next_char, next_node)| {
+            current_word.push(next_char);
+            next_node.fill_all_children(current_word, result);
+            current_word.pop();
+        });
     }
 
     fn format_impl(&self, indent: usize, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -128,6 +140,17 @@ impl Trie {
         self.root.find_prefix(prefix)
     }
 
+    pub fn find_all(&self, prefix: &str) -> Vec<String> {
+        let mut result = vec![];
+
+        if let Some(starting_point) = self.root.find_prefix(prefix) {
+            let mut current_word = prefix.to_owned().chars().collect();
+            starting_point.fill_all_children(&mut current_word, &mut result);
+        }
+
+        result
+    }
+
     pub fn len(&self) -> usize {
         self.words_count
     }
@@ -150,6 +173,17 @@ impl Debug for Trie {
     }
 }
 
+impl From<Vec<&str>> for Trie {
+    fn from(value: Vec<&str>) -> Self {
+        let mut trie = Trie::new();
+        value.into_iter().for_each(|s| {
+            trie.insert(s);
+        });
+
+        trie
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Trie;
@@ -165,11 +199,6 @@ mod test {
         distributions::{DistString, Uniform},
         prelude::Distribution,
     };
-
-    #[fixture]
-    fn empty_trie() -> Trie {
-        Trie::new()
-    }
 
     lazy_static! {
         static ref RAND_WORDS: Vec<String> = {
@@ -220,30 +249,18 @@ mod test {
     }
 
     #[fixture]
-    fn top100trie(mut empty_trie: Trie, top100words: Vec<&str>) -> Trie {
-        for word in top100words.into_iter() {
-            empty_trie.insert(&word);
-        }
-
-        empty_trie
+    fn top100trie(top100words: Vec<&str>) -> Trie {
+        Trie::from(top100words)
     }
 
     #[fixture]
-    fn random_trie(mut empty_trie: Trie, random_words: Vec<&str>) -> Trie {
-        for word in random_words.into_iter() {
-            empty_trie.insert(&word);
-        }
-
-        empty_trie
+    fn random_trie(random_words: Vec<&str>) -> Trie {
+        Trie::from(random_words)
     }
 
     #[fixture]
-    fn lol_kek_chebureck_trie(mut empty_trie: Trie, lol_kek_chebureck_list: Vec<&str>) -> Trie {
-        for word in lol_kek_chebureck_list.into_iter() {
-            empty_trie.insert(word);
-        }
-
-        empty_trie
+    fn lol_kek_chebureck_trie(lol_kek_chebureck_list: Vec<&str>) -> Trie {
+        Trie::from(lol_kek_chebureck_list)
     }
 
     mod trie_contains_inserted_words {
@@ -300,12 +317,50 @@ mod test {
         }
     }
 
+    mod find_all {
+        use super::*;
+
+        #[rstest]
+        fn empty_prefix_populates_all_words(
+            lol_kek_chebureck_trie: Trie,
+            lol_kek_chebureck_list: Vec<&str>,
+        ) {
+            let mut expected_result: Vec<String> = lol_kek_chebureck_list
+                .into_iter()
+                .map(String::from)
+                .collect();
+            expected_result.sort();
+
+            let mut result = lol_kek_chebureck_trie.find_all("");
+            result.sort();
+
+            assert_eq!(result, expected_result);
+        }
+
+        #[rstest]
+        fn find_all_works() {
+            let words_list = vec![
+                "abcaaaa", "abdaa", "bca", "abc0010", "abc", "0abc", "abcabc",
+            ];
+            let prefix = "abc";
+            let mut expected_result = vec!["abcaaaa", "abc0010", "abc", "abcabc"];
+            expected_result.sort();
+
+            let trie = Trie::from(words_list);
+
+            let mut result = trie.find_all(prefix);
+            result.sort();
+
+            assert_eq!(result, expected_result);
+        }
+    }
+
     mod trie_size_is_correct {
         use super::*;
 
         #[rstest]
-        fn empty_has_zero_len(empty_trie: Trie) {
-            assert_returns!(0, Trie::len, &empty_trie);
+        fn empty_has_zero_len() {
+            assert_returns!(0, Trie::len, &Trie::new());
         }
 
         #[rstest]

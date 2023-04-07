@@ -71,6 +71,10 @@ impl Solution {
             if i > 0 && num1 == nums[i - 1] {
                 continue;
             }
+            if num1 > 0 {
+                break;
+            }
+
             let mut left = i + 1;
             let mut right = nums.len() - 1;
 
@@ -79,14 +83,8 @@ impl Solution {
 
                 if sum < 0 {
                     left += 1;
-                    while left < right && nums[left] == nums[left - 1] {
-                        left += 1;
-                    }
                 } else if sum > 0 {
                     right -= 1;
-                    while left < right && nums[right] == nums[right + 1] {
-                        right -= 1;
-                    }
                 } else {
                     result.push(vec![num1, nums[left], nums[right]]);
                     left += 1;
@@ -98,10 +96,14 @@ impl Solution {
                         right -= 1;
                     }
                 }
+
+                if nums[right] < 0 {
+                    break;
+                }
             }
         }
 
-        result.into_iter().collect()
+        result
     }
 
     pub fn three_sum_3(nums: Vec<i32>) -> Vec<Vec<i32>> {
