@@ -6,7 +6,7 @@ pub struct Solution;
 
 impl Solution {
     pub fn three_sum(nums: Vec<i32>) -> Vec<Vec<i32>> {
-        Solution::three_sum_4(nums)
+        Solution::three_sum_2_optimized(nums)
     }
 
     pub fn three_sum_1(mut nums: Vec<i32>) -> Vec<Vec<i32>> {
@@ -60,6 +60,48 @@ impl Solution {
         }
 
         result.into_iter().map(|v| vec![v.0, v.1, v.2]).collect()
+    }
+
+    pub fn three_sum_2_optimized(mut nums: Vec<i32>) -> Vec<Vec<i32>> {
+        nums.sort_unstable();
+
+        let mut result = vec![];
+
+        for (i, &num1) in nums.iter().take(nums.len() - 2).enumerate() {
+            if i > 0 && num1 == nums[i - 1] {
+                continue;
+            }
+            let mut left = i + 1;
+            let mut right = nums.len() - 1;
+
+            while left < right {
+                let sum = num1 + nums[left] + nums[right];
+
+                if sum < 0 {
+                    left += 1;
+                    while left < right && nums[left] == nums[left - 1] {
+                        left += 1;
+                    }
+                } else if sum > 0 {
+                    right -= 1;
+                    while left < right && nums[right] == nums[right + 1] {
+                        right -= 1;
+                    }
+                } else {
+                    result.push(vec![num1, nums[left], nums[right]]);
+                    left += 1;
+                    right -= 1;
+                    while left < right && nums[left] == nums[left - 1] {
+                        left += 1;
+                    }
+                    while left < right && nums[right] == nums[right + 1] {
+                        right -= 1;
+                    }
+                }
+            }
+        }
+
+        result.into_iter().collect()
     }
 
     pub fn three_sum_3(nums: Vec<i32>) -> Vec<Vec<i32>> {
@@ -129,7 +171,7 @@ impl Solution {
         result.into_iter().collect()
     }
 
-    pub fn three_sum_4(nums: Vec<i32>) -> Vec<Vec<i32>> {
+    pub fn three_sum_3_optimized(nums: Vec<i32>) -> Vec<Vec<i32>> {
         let mut negatives: HashMap<i32, i32> = HashMap::new();
         let mut positives: HashMap<i32, i32> = HashMap::new();
         let mut zeros = 0;
