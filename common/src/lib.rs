@@ -9,18 +9,25 @@ macro_rules! assert_returns {
     // it as a string along with its result.
     // The `expr` designator is used for expressions.
     ($ret_value:expr, $func:expr, $($args:expr),*) => {
+        let result = $func($($args),*);
+
+        let mut args_str: String = "".into();
+        $(
+            args_str += format!("{:?}, ", $args).as_str();
+        )*
+        args_str.pop();
+        args_str.pop();
+
         // `stringify!` will convert the expression *as it is* into a string.
         let mut error_msg = format!(
-            "expected result: {:?},\nfunction: {:?},\nargs:",
-            $ret_value,
+            "{}({}) returned {:?}\nexpected result: {:?}\n",
             stringify!($func),
+            args_str,
+            result,
+            $ret_value,
             );
-        $(
-            error_msg += format!("\n  {:?}", $args).as_str();
-        )*
-            error_msg += "\n";
 
-        assert_eq!($func($($args),*), $ret_value, "\n{:}", error_msg);
+        assert!(result == $ret_value, "\n{:}", error_msg);
     };
 }
 
