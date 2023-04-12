@@ -512,6 +512,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "jump-game-ii"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "rstest 0.17.0",
+]
+
+[[package]]
+name = "jump-game-iii"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "rstest 0.17.0",
+]
+
+[[package]]
 name = "k-closest-points-to-origin"
 version = "0.1.0"
 dependencies = [
