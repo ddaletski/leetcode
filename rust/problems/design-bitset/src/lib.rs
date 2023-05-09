@@ -93,7 +93,7 @@ impl Bitset {
 
 #[cfg(test)]
 mod test {
-    use common::assert_returns;
+    
 
     use crate::Bitset;
 

@@ -250,7 +250,7 @@ impl Solution {
 
 #[cfg(test)]
 mod tests {
-    use common::{assert_returns, vec2d};
+    use common::{vec2d};
 
     use super::*;
 
