@@ -1,19 +1,19 @@
-use common::trie::{Trie, TrieNode};
+use common::trie::{CharTrie, TrieNode};
 
 #[derive(Debug)]
 struct MagicDictionary {
-    trie: Trie,
+    trie: CharTrie,
 }
 
 struct SearchState<'a> {
-    node: &'a TrieNode,
+    node: &'a TrieNode<char>,
     word_pos: usize,
     replacement_left: bool,
 }
 
 impl MagicDictionary {
     pub fn new() -> Self {
-        MagicDictionary { trie: Trie::new() }
+        MagicDictionary { trie: CharTrie::new() }
     }
 
     pub fn build_dict(&mut self, dictionary: Vec<String>) {

@@ -253,6 +253,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "delete_duplicate_folders_in_system"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "rstest 0.15.0",
+]
+
+[[package]]
 name = "delete_the_middle_node_of_a_linked_list"
 version = "0.1.0"
 dependencies = [

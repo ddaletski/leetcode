@@ -1,18 +1,18 @@
 use std::collections::LinkedList;
 
-use common::trie::{Trie, TrieNode};
+use common::trie::{CharTrie, TrieNode};
 
 /////////////////////////////////////////////////////////////
 
 #[derive(Debug)]
 pub struct StreamChecker {
-    trie: Trie,
-    current_matches: LinkedList<*const TrieNode>,
+    trie: CharTrie,
+    current_matches: LinkedList<*const TrieNode<char>>,
 }
 
 impl StreamChecker {
     pub fn new(words: Vec<String>) -> Self {
-        let mut trie = Trie::new();
+        let mut trie = CharTrie::new();
         for word in words {
             trie.insert(&word);
         }
@@ -27,7 +27,7 @@ impl StreamChecker {
         let mut result = false;
         unsafe {
             for node in std::mem::replace(&mut self.current_matches, LinkedList::new()) {
-                if let Some(child) = node.as_ref().unwrap().find_prefix(&letter.to_string()) {
+                if let Some(child) = node.as_ref().unwrap().find_prefix(std::iter::once(letter)) {
                     self.current_matches.push_back(child);
 
                     if child.word_end {

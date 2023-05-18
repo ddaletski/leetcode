@@ -1,17 +1,19 @@
 use std::collections::{HashMap, HashSet};
 
-use common::trie::Trie;
+use common::trie::CharTrie;
 
+#[allow(unused)]
 struct WordFilter1 {
-    forward_trie: Trie,
-    backward_trie: Trie,
+    forward_trie: CharTrie,
+    backward_trie: CharTrie,
     index_mapping: HashMap<String, i32>,
 }
 
+#[allow(unused)]
 impl WordFilter1 {
     fn new(words: Vec<String>) -> Self {
-        let mut fw = Trie::new();
-        let mut bw = Trie::new();
+        let mut fw = CharTrie::new();
+        let mut bw = CharTrie::new();
 
         words.iter().for_each(|word| {
             let word_reversed: String = word.chars().rev().collect();
@@ -54,11 +56,13 @@ impl WordFilter1 {
     }
 }
 
+#[allow(unused)]
 struct WordFilter2 {
     prefixes: HashMap<String, HashSet<u16>>,
     suffixes: HashMap<String, HashSet<u16>>,
 }
 
+#[allow(unused)]
 impl WordFilter2 {
     fn new(words: Vec<String>) -> Self {
         let words: HashMap<String, i32> = words
@@ -112,6 +116,7 @@ impl WordFilter2 {
     }
 }
 
+#[allow(unused)]
 type WordFilter = WordFilter2;
 
 #[cfg(test)]

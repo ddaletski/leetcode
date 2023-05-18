@@ -4,10 +4,50 @@ pub mod linked_list;
 pub mod trie;
 
 #[macro_export]
+macro_rules! format_expr_kv {
+    ($key:literal) => {
+        ""
+    };
+    ($key:expr) => {
+        format!("\n  {}: `{}`", stringify!($key), format!("{:?}", $key))
+    };
+}
+
+#[macro_export]
+macro_rules! assert_eq {
+    ($left:expr, $right:expr, $fmt_str:literal, $($fmt_args:expr),*) => {
+        let left_lit = stringify!($left);
+        let right_lit = stringify!($right);
+
+        if ($left != $right) {
+            let custom_message = format!($fmt_str, $($fmt_args),*);
+            let appendix = if custom_message.is_empty() {
+                "".into()
+            } else {
+                format!("\nmessage: {}", custom_message)
+            };
+
+            let left_kv = format_expr_kv!($left);
+            let right_kv = format_expr_kv!($right);
+
+            let where_msg = if left_kv.is_empty() && right_kv.is_empty() {
+                ""
+            } else {
+                "\nwhere"
+            };
+
+            panic!(
+                "assertion failed:\n`{left_lit} == {right_lit}`{where_msg}{left_kv}{right_kv}{appendix}"
+            );
+        }
+    };
+
+    ($left:expr, $right:expr) => {
+        assert_eq!($left, $right, "{}", "");
+    }
+}
+#[macro_export]
 macro_rules! assert_returns {
-    // This macro takes an expression of type `expr` and prints
-    // it as a string along with its result.
-    // The `expr` designator is used for expressions.
     ($ret_value:expr, $func:expr, $($args:expr),*) => {
         let mut args_str: String = "".into();
         $(
@@ -15,7 +55,7 @@ macro_rules! assert_returns {
         )*
         args_str.pop();
         args_str.pop();
-        
+
         let result = $func($($args),*);
 
         // `stringify!` will convert the expression *as it is* into a string.
