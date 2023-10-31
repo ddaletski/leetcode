@@ -2,41 +2,34 @@ import click
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
-import subprocess
-
 
 @click.command()
 @click.argument("url", type=str)
 def clone_problem(url: str):
     script_dir = Path(sys.argv[0]).parent
-    problems_dir = script_dir / "problems"
+    root_dir = script_dir / "src"
 
-    problem_name = urlparse(url).path.strip("/").split("/")[-1]
-    print(f"clonning {problem_name}")
+    problem_name = urlparse(url).path.strip("/").split("/")[-1].replace("-", "_")
+    problem_dir = root_dir / problem_name
 
-
-    problem_dir = problems_dir / problem_name
-    init_cargo_project(problem_dir)
-
-    with open(problem_dir / "link.txt", "w") as f:
-        f.write(url)
-
-
-def init_cargo_project(problem_dir: Path):
-    try:
-        problem_dir.mkdir()
-    except FileExistsError:
+    if problem_dir.exists():
         print("problem is already cloned")
         return
+    else:
+        problem_dir.mkdir()
 
-    def run_command(cmd: str):
-        subprocess.run(cmd, shell=True,
-                       check=True, cwd=problem_dir.absolute())
+    file_path = problem_dir / "mod.rs"
+    link_path = problem_dir / "link.txt"
+    lib_path = root_dir / "lib.rs"
 
-    run_command("cargo init --lib")
-    run_command("cargo add --dev rstest")
-    run_command("cargo add --dev --path=../../common")
+    with open(link_path, "w") as f:
+        f.write(url)
 
+    with open(file_path, "w") as f:
+        f.write("struct Solution;\n\nimpl Solution {\n}\n")
+
+    with open(lib_path, "a") as f:
+        f.write(f"mod {problem_name};\n")
 
 if __name__ == "__main__":
     clone_problem()

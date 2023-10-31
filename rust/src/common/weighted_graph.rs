@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, BinaryHeap};
 
 use crate::common::disjoint_sets_union::{HashMapDSU, UnionFind};
 
@@ -159,13 +159,11 @@ impl<T, Weight: Copy> WeightedGraph<T, Weight> {
         Weight: Ord,
     {
         let mut result = vec![];
-
-        let mut edges: Vec<_> = self.edges().collect();
-        edges.sort_unstable_by_key(|edge| edge.weight);
-
         let mut dsu = HashMapDSU::new();
 
-        for edge in edges {
+        let edges: BinaryHeap<_> = self.edges().map(|it| std::cmp::Reverse(it)).collect();
+
+        for edge in edges.into_iter().map(|rev| rev.0) {
             if result.len() == self.len() - 1 {
                 break;
             }
@@ -181,6 +179,19 @@ impl<T, Weight: Copy> WeightedGraph<T, Weight> {
         result
     }
 }
+
+impl<Weight: PartialOrd> PartialOrd for Edge<Weight> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.weight.partial_cmp(&other.weight)
+    }
+}
+
+impl<Weight: Ord> Ord for Edge<Weight> {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.weight.cmp(&other.weight)
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
