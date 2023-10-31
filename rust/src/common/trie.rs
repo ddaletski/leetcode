@@ -251,7 +251,6 @@ impl From<Vec<&str>> for CharTrie {
 mod test {
     use crate::assert_returns;
     use rstest::{fixture, rstest};
-    use std::path::PathBuf;
 
     use lazy_static::lazy_static;
     use proptest::proptest;
@@ -280,11 +279,9 @@ mod test {
             random_words
         };
         static ref WORDS_100: Vec<String> = {
-            let words_file_path =
-                PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("testdata/words100.txt");
+            let words_file_content = include_str!("testdata/words100.txt");
 
-            std::fs::read_to_string(words_file_path)
-                .unwrap()
+            words_file_content
                 .trim()
                 .split("\n")
                 .map(|s| s.to_owned())

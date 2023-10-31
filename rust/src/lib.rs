@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub mod common;
 mod count_number_of_homogenous_substrings;
 mod count_primes;

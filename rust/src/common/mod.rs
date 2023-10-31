@@ -1,7 +1,8 @@
 pub mod binary_tree;
-pub mod disjoint_set;
+pub mod disjoint_sets_union;
 pub mod linked_list;
 pub mod trie;
+pub mod weighted_graph;
 
 #[macro_export]
 macro_rules! format_expr_kv {

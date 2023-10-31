@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::common::disjoint_set::{DisjointHashSet, UnionFind};
+use crate::common::disjoint_sets_union::{HashMapDSU, UnionFind};
 
 pub struct Solution {}
 
@@ -26,7 +26,7 @@ impl Solution {
     pub fn largest_component_size(nums: Vec<i32>) -> i32 {
         let nums_set: HashSet<usize> = nums.iter().map(|&n| n as usize).collect();
 
-        let mut set = DisjointHashSet::new();
+        let mut set = HashMapDSU::new();
 
         for num in nums.into_iter().map(|i| i as usize) {
             set.insert(num);

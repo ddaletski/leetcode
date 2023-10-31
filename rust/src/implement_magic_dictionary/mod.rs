@@ -71,8 +71,6 @@ impl MagicDictionary {
 
 #[cfg(test)]
 mod tests {
-    use std::iter::zip;
-
     use super::*;
     use crate::assert_returns;
     use rstest::{fixture, rstest};
