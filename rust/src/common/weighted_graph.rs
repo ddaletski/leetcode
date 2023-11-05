@@ -1,4 +1,4 @@
-use std::collections::{HashMap, BinaryHeap};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 
 use crate::common::disjoint_sets_union::{HashMapDSU, UnionFind};
 
@@ -23,7 +23,7 @@ pub struct Edge<Weight> {
     pub weight: Weight,
 }
 
-impl <Weight> Edge<Weight> {
+impl<Weight> Edge<Weight> {
     pub fn new(from: VertexID, to: VertexID, weight: Weight) -> Self {
         Edge { from, to, weight }
     }
@@ -60,7 +60,10 @@ impl<T, Weight: Copy> WeightedGraph<T, Weight> {
 
     /// add an edge to the graph
     pub fn add_edge(&mut self, edge: Edge<Weight>) {
-        assert!(self.contains(edge.from), "can't connect non-existent vertex");
+        assert!(
+            self.contains(edge.from),
+            "can't connect non-existent vertex"
+        );
         assert!(self.contains(edge.to), "can't connect non-existent vertex");
 
         let id1 = edge.from;
@@ -97,7 +100,11 @@ impl<T, Weight: Copy> WeightedGraph<T, Weight> {
 
     /// number of edges in the graph
     pub fn edges_count(&self) -> usize {
-        self.adjacencies.values().map(|links| links.len()).sum::<usize>() / 2
+        self.adjacencies
+            .values()
+            .map(|links| links.len())
+            .sum::<usize>()
+            / 2
     }
 
     /// iterator over all vertices in the graph
@@ -127,10 +134,9 @@ impl<T, Weight: Copy> WeightedGraph<T, Weight> {
     /// iterator over all vertices which are adjacent to the vertex with a given id
     pub fn adjacent_vertices(&self, id: VertexID) -> impl Iterator<Item = Vertex<&T>> + '_ {
         let iterator = self.adjacent_edges(id).filter_map(|edge| {
-            self.vertices.get(&edge.to).map(|value| Vertex {
-                id: edge.to,
-                value,
-            })
+            self.vertices
+                .get(&edge.to)
+                .map(|value| Vertex { id: edge.to, value })
         });
 
         iterator
@@ -142,19 +148,17 @@ impl<T, Weight: Copy> WeightedGraph<T, Weight> {
             return Box::new(std::iter::empty());
         };
 
-        let iterator = links.iter().map(move |(&other_id, &weight)| {
-            Edge {
-                from: id,
-                to: other_id,
-                weight
-            }
+        let iterator = links.iter().map(move |(&other_id, &weight)| Edge {
+            from: id,
+            to: other_id,
+            weight,
         });
 
         Box::new(iterator)
     }
 
     /// Compute minimum spanning tree using Kruskal's algorithm
-    pub fn mst(&self) -> Vec<Edge<Weight>>
+    pub fn mst_kruskal(&self) -> Vec<Edge<Weight>>
     where
         Weight: Ord,
     {
@@ -178,6 +182,41 @@ impl<T, Weight: Copy> WeightedGraph<T, Weight> {
 
         result
     }
+
+    /// Compute minimum spanning tree using Prim's algorithm
+    pub fn mst_prim(&self) -> Vec<Edge<Weight>>
+    where
+        Weight: Ord,
+    {
+        let mut result = vec![];
+
+        let mut visited_vertices = HashSet::new();
+
+        let first_vertex = self.vertices().next().unwrap();
+        visited_vertices.insert(first_vertex.id);
+
+        let mut edges: BinaryHeap<_> = self
+            .adjacent_edges(first_vertex.id)
+            .map(|it| std::cmp::Reverse(it))
+            .collect();
+
+
+        while !edges.is_empty() {
+            let edge = edges.pop().unwrap().0;
+            if visited_vertices.contains(&edge.to) {
+                continue;
+            }
+
+            for edge in self.adjacent_edges(edge.to) {
+                edges.push(std::cmp::Reverse(edge));
+            }
+
+            visited_vertices.insert(edge.to);
+            result.push(edge);
+        }
+
+        result
+    }
 }
 
 impl<Weight: PartialOrd> PartialOrd for Edge<Weight> {
@@ -191,7 +230,6 @@ impl<Weight: Ord> Ord for Edge<Weight> {
         self.weight.cmp(&other.weight)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -221,7 +259,6 @@ mod tests {
         assert!(!graph.contains(1));
         assert!(!graph.contains(8));
     }
-
 
     #[test]
     fn test_connected() {
@@ -296,8 +333,8 @@ mod tests {
         assert!(edges.contains(&Edge::new(1, 2, 2.0)));
     }
 
-    #[test]
-    fn test_mst() {
+    #[rstest::fixture]
+    fn graph_for_mst() -> WeightedGraph<&'static str> {
         let mut graph = WeightedGraph::new();
         graph.insert(0, "A");
         graph.insert(1, "B");
@@ -310,7 +347,21 @@ mod tests {
         graph.add_edge(Edge::new(1, 3, 5));
         graph.add_edge(Edge::new(2, 3, 6));
 
-        let mst = graph.mst();
+        graph
+    }
+
+    #[rstest::rstest]
+    fn test_mst_kruskal(graph_for_mst: WeightedGraph<&'static str>) {
+        let mst = graph_for_mst.mst_kruskal();
+        assert_eq!(mst.len(), 3);
+        assert!(mst.contains(&Edge::new(0, 1, 1)));
+        assert!(mst.contains(&Edge::new(0, 2, 2)));
+        assert!(mst.contains(&Edge::new(0, 3, 3)));
+    }
+
+    #[rstest::rstest]
+    fn test_mst_prim(graph_for_mst: WeightedGraph<&'static str>) {
+        let mst = graph_for_mst.mst_prim();
         assert_eq!(mst.len(), 3);
         assert!(mst.contains(&Edge::new(0, 1, 1)));
         assert!(mst.contains(&Edge::new(0, 2, 2)));

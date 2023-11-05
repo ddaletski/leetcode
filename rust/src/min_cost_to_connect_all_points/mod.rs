@@ -22,7 +22,7 @@ impl Solution {
             }
         }
 
-        let mst = graph.mst();
+        let mst = graph.mst_prim();
         mst.iter().map(|edge| edge.weight).sum()
     }
 }
