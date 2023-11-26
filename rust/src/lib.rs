@@ -37,3 +37,4 @@ mod three_sum;
 mod three_sum_closest;
 mod word_break;
 mod word_search;
+mod repeated_dna_sequences;
