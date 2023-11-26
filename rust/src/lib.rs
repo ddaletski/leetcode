@@ -19,6 +19,7 @@ mod jump_game_iii;
 mod k_closest_points_to_origin;
 mod largest_component_size_by_common_factor;
 mod largest_plus_sign;
+mod last_day_where_you_can_still_cross;
 mod longest_common_prefix;
 mod merge_k_sorted_lists;
 mod merge_nodes_between_zeros;
